@@ -2,14 +2,14 @@ package info.sjd.emulators;
 
 import java.util.Random;
 
-public class SessionInfoEmulator {
+public class SessionInfoGenerator {
 
 	private StringBuilder sessionInfo;
 	private int sessionID;
 	private long sessionTime;
 	private String ipAddress;
 
-	public SessionInfoEmulator() {
+	public SessionInfoGenerator() {
 
 		setSessionTime();
 		setRandomSessionID();
@@ -20,7 +20,7 @@ public class SessionInfoEmulator {
 	private void setRandomSessionID() {
 		int temp = new Random().nextInt(999999999);
 		if (temp >= 100000000) {
-			sessionID = new Random().nextInt(999999999);
+			sessionID = temp;
 		} else {
 			setRandomSessionID();
 		}
@@ -31,17 +31,17 @@ public class SessionInfoEmulator {
 	}
 
 	private void setRandomIPAddress() {
-		int a = new Random().nextInt(255);
-		int b = new Random().nextInt(255);
-		int c = new Random().nextInt(255);
-		int d = new Random().nextInt(255);
-		ipAddress = a + "." + b + "." + c + "." + d;
+		int ipBlock1 = new Random().nextInt(255);
+		int ipBlock2 = new Random().nextInt(255);
+		int ipBlock3 = new Random().nextInt(255);
+		int ipBlock4 = new Random().nextInt(255);
+		ipAddress = ipBlock1 + "." + ipBlock2 + "." + ipBlock3 + "." + ipBlock4;
 	}
 
 	private void setInfoString() {
 
 		sessionInfo = new StringBuilder().append(sessionTime).append(" ").append(sessionID).append(" ")
-				.append(ipAddress);
+				.append(ipAddress).append("\r\n");
 	}
 
 	public String getSessionInfo() {
