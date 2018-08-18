@@ -40,7 +40,7 @@ public class IOProcessor {
 
 		List<SessionInfo> listInRange = new ArrayList<SessionInfo>();
 
-		if (new File(logFile).exists()) {
+		if (!new File(logFile).exists()) {
 			throw new ExceptionSJD("log file: " + logFile + " does not exists");
 		} else {
 			if (fromDate <= 0 || fromDate > toDate || toDate <= 0 || toDate < fromDate) {
@@ -81,7 +81,7 @@ public class IOProcessor {
 	// DELETE FROM LOG FILE RECORDS OLDER THAN SPECIFIED PERIOD OF TIME
 	public void deleteOldRecords(long olderThan) throws ExceptionSJD {
 
-		if (new File(logFile).exists()) {
+		if (!new File(logFile).exists()) {
 			throw new ExceptionSJD("log file: " + logFile + " does not exists");
 		} else {
 			if (olderThan <= 0 || olderThan > System.currentTimeMillis()) {
