@@ -1,115 +1,112 @@
 package info.sjd.io;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
-import info.sjd.emulators.SessionInfoGenerator;
+import info.sjd.emulators.SessionInfo;
+import info.sjd.exceptions.ExceptionSJD;
 
 public class IOProcessor {
+	String logFile = "src/info/sjd/content/log.txt";
 
+	// PUT RECORDS TO FILE
+	public void writeLogToFile(SessionInfo sie) throws ExceptionSJD {
+		if (sie == null) {
+			throw new ExceptionSJD("SessionInfo object is not initialized");
+		} else {
+			try (FileWriter fileWriter = new FileWriter(logFile, true)) {
 
-	//WRITE RECORDS TO FILE
-	public void writeLogToFile(SessionInfoGenerator sie) {
+				fileWriter.write(sie.toString());
+				fileWriter.write("\r\n");
+				fileWriter.flush();
 
-		char[] buffer = new char[sie.getSessionInfo().length()];
-		sie.getSessionInfo().getChars(0, sie.getSessionInfo().length(), buffer, 0);
+			} catch (IOException e) {
 
-		try (FileWriter fileWriter = new FileWriter("src/info/sjd/content/log.txt", true)) {
+				System.out.println("Output log to file fault");
+				e.printStackTrace();
 
-			for (int i = 0; i < buffer.length; i++) {
-				fileWriter.write(buffer[i]);
 			}
 
-		} catch (IOException e) {
-
-			System.out.println("Output log to file fault");
-			e.printStackTrace();
-
 		}
-
 	}
 
-	// READ RECORDS FROM FILE
-	public void readLogFromFile(long fromDate, long toDate) {
+	// GET RECORDS FROM FILE. return LIST of SessioInfo objects
+	public List<SessionInfo> readLogPerPeriod(long fromDate, long toDate) throws ExceptionSJD {
 
-		Logger logger = Logger.getLogger(IOProcessor.class.getSimpleName());
+		List<SessionInfo> listInRange = new ArrayList<SessionInfo>();
 
-		try (BufferedReader reader = new BufferedReader(new FileReader("src/info/sjd/content/log.txt"))) {
+		if (new File(logFile).exists()) {
+			throw new ExceptionSJD("log file: " + logFile + " does not exists");
+		} else {
+			if (fromDate <= 0 || fromDate > toDate || toDate <= 0 || toDate < fromDate) {
+				throw new ExceptionSJD("incorrect period parameters");
+			} else {
 
-			String line;
+				try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
 
-			while ((line = reader.readLine()) != null) {
+					String line;
 
-				long dateOfRecordCreate = Long.parseLong(line.substring(0, 13));
-				if (dateOfRecordCreate > fromDate && dateOfRecordCreate < toDate) {
+					while ((line = reader.readLine()) != null) {
 
-					logger.info(line);
+						long dateOfRecordCreate = Long.parseLong(line.substring(0, 13));
+
+						if (dateOfRecordCreate > fromDate && dateOfRecordCreate < toDate) {
+
+							SessionInfo sessionInfo = new SessionInfo();
+							String[] fieldsSessionInfo = line.split(" ");
+
+							sessionInfo.setSessionTime(Long.valueOf(fieldsSessionInfo[0]));
+							sessionInfo.setSessionID(Integer.valueOf(fieldsSessionInfo[1]));
+							sessionInfo.setIpAddress(fieldsSessionInfo[2]);
+
+							listInRange.add(sessionInfo);
+						}
+					}
+				} catch (IOException e) {
+
+					System.out.println("Reading log from file is fault");
+					e.printStackTrace();
 
 				}
 			}
-		} catch (IOException e) {
-
-			System.out.println("Reading log from file is fault");
-			e.printStackTrace();
-
 		}
-
+		return listInRange;
 	}
 
-	// REMOVE FROM LOG FILE RECORDS OLDER THAN THREE DAYS
-	public void deleteOldRecords() {
+	// DELETE FROM LOG FILE RECORDS OLDER THAN SPECIFIED PERIOD OF TIME
+	public void deleteOldRecords(long olderThan) throws ExceptionSJD {
 
-		long ThreeDays = 259200000;
-		long dateOfRecord;
-		String line;
-		List<String> recordsBufferList = new ArrayList<String>();
+		if (new File(logFile).exists()) {
+			throw new ExceptionSJD("log file: " + logFile + " does not exists");
+		} else {
+			if (olderThan <= 0 || olderThan > System.currentTimeMillis()) {
+				throw new ExceptionSJD("incorrect 'older than' parameter");
+			} else {
 
-		// READ LOG AND FILTER RECORDS BY DATE
+				List<SessionInfo> filteredList = readLogPerPeriod(System.currentTimeMillis() - olderThan,
+						System.currentTimeMillis());
 
-		try (BufferedReader reader = new BufferedReader(new FileReader("src/info/sjd/content/log.txt"))) {
+				try (FileWriter fileWriter = new FileWriter(logFile)) {
 
-			while ((line = reader.readLine()) != null) {
+					for (int i = 0; i < filteredList.size(); i++) {
+						fileWriter.write(filteredList.get(i).toString());
+						fileWriter.write("\r\n");
+						fileWriter.flush();
+					}
 
-				dateOfRecord = Long.parseLong(line.substring(0, 13));
+				} catch (IOException e) {
 
-				if (dateOfRecord > System.currentTimeMillis() - ThreeDays) {
-					recordsBufferList.add(line + "\r\n");
-				}
-			}
-		} catch (IOException e) {
-
-			System.out.println("Reading log from file is fault");
-			e.printStackTrace();
-
-		}
-
-		// WRITE NEW LOG FILE
-
-		try (FileWriter fileWriter = new FileWriter("src/info/sjd/content/log.txt")) {
-
-			for (int i = 0; i < recordsBufferList.size(); i++) {
-
-				char[] buffer = new char[recordsBufferList.get(i).length()];
-				recordsBufferList.get(i).getChars(0, recordsBufferList.get(i).length(), buffer, 0);
-
-				for (int i2 = 0; i2 < buffer.length; i2++) {
-					fileWriter.write(buffer[i2]);
+					System.out.println("Output log to file fault");
+					e.printStackTrace();
 
 				}
-
 			}
-		} catch (IOException e) {
-
-			System.out.println("Output log to file fault");
-			e.printStackTrace();
-
 		}
-
 	}
 
 }
