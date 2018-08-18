@@ -14,7 +14,7 @@ public class IOProcessor {
 	String logFile = "src/info/sjd/content/log.txt";
 
 	// PUT RECORDS TO FILE
-	public void writeLogToFile(SessionInfo sie) throws ExceptionSJD {
+	public synchronized void writeLogToFile(SessionInfo sie) throws ExceptionSJD {
 		if (sie == null) {
 			throw new ExceptionSJD("SessionInfo object is not initialized");
 		} else {
@@ -34,7 +34,7 @@ public class IOProcessor {
 	}
 
 	// GET RECORDS FROM FILE. return LIST of SessioInfo objects
-	public List<SessionInfo> readLogPerPeriod(long fromDate, long toDate) throws ExceptionSJD {
+	public synchronized List<SessionInfo> readLogPerPeriod(long fromDate, long toDate) throws ExceptionSJD {
 
 		List<SessionInfo> listInRange = new ArrayList<SessionInfo>();
 
@@ -74,7 +74,7 @@ public class IOProcessor {
 	}
 
 	// DELETE FROM LOG FILE RECORDS OLDER THAN SPECIFIED PERIOD OF TIME
-	public void deleteOldRecords(long olderThan) throws ExceptionSJD {
+	public synchronized void deleteOldRecords(long olderThan) throws ExceptionSJD {
 
 		if (olderThan <= 0 || olderThan > System.currentTimeMillis()) {
 			throw new ExceptionSJD("incorrect 'older than' parameter");
