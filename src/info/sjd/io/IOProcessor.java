@@ -27,7 +27,6 @@ public class IOProcessor {
 
 			} catch (IOException e) {
 
-				System.out.println("Output log to file fault");
 				e.printStackTrace();
 
 			}
@@ -40,72 +39,66 @@ public class IOProcessor {
 
 		List<SessionInfo> listInRange = new ArrayList<SessionInfo>();
 
-		if (!new File(logFile).exists()) {
-			throw new ExceptionSJD("log file: " + logFile + " does not exists");
+		if (fromDate <= 0 || fromDate > toDate || toDate <= 0 || toDate < fromDate) {
+			throw new ExceptionSJD("incorrect period parameters");
 		} else {
-			if (fromDate <= 0 || fromDate > toDate || toDate <= 0 || toDate < fromDate) {
-				throw new ExceptionSJD("incorrect period parameters");
-			} else {
 
-				try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+			try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
 
-					String line;
+				String line;
 
-					while ((line = reader.readLine()) != null) {
+				while ((line = reader.readLine()) != null) {
 
-						long dateOfRecordCreate = Long.parseLong(line.substring(0, 13));
+					long dateOfRecordCreate = Long.parseLong(line.substring(0, 13));
 
-						if (dateOfRecordCreate > fromDate && dateOfRecordCreate < toDate) {
+					if (dateOfRecordCreate > fromDate && dateOfRecordCreate < toDate) {
 
-							SessionInfo sessionInfo = new SessionInfo();
-							String[] fieldsSessionInfo = line.split(" ");
+						SessionInfo sessionInfo = new SessionInfo();
+						String[] fieldsSessionInfo = line.split(" ");
 
-							sessionInfo.setSessionTime(Long.valueOf(fieldsSessionInfo[0]));
-							sessionInfo.setSessionID(Integer.valueOf(fieldsSessionInfo[1]));
-							sessionInfo.setIpAddress(fieldsSessionInfo[2]);
+						sessionInfo.setSessionTime(Long.valueOf(fieldsSessionInfo[0]));
+						sessionInfo.setSessionID(Integer.valueOf(fieldsSessionInfo[1]));
+						sessionInfo.setIpAddress(fieldsSessionInfo[2]);
 
-							listInRange.add(sessionInfo);
-						}
+						listInRange.add(sessionInfo);
 					}
-				} catch (IOException e) {
-
-					System.out.println("Reading log from file is fault");
-					e.printStackTrace();
-
 				}
+			} catch (IOException e) {
+
+				System.out.println("Reading log from file is fault");
+				e.printStackTrace();
+
 			}
 		}
+
 		return listInRange;
 	}
 
 	// DELETE FROM LOG FILE RECORDS OLDER THAN SPECIFIED PERIOD OF TIME
 	public void deleteOldRecords(long olderThan) throws ExceptionSJD {
 
-		if (!new File(logFile).exists()) {
-			throw new ExceptionSJD("log file: " + logFile + " does not exists");
+		if (olderThan <= 0 || olderThan > System.currentTimeMillis()) {
+			throw new ExceptionSJD("incorrect 'older than' parameter");
 		} else {
-			if (olderThan <= 0 || olderThan > System.currentTimeMillis()) {
-				throw new ExceptionSJD("incorrect 'older than' parameter");
-			} else {
 
-				List<SessionInfo> filteredList = readLogPerPeriod(System.currentTimeMillis() - olderThan,
-						System.currentTimeMillis());
+			List<SessionInfo> filteredList = readLogPerPeriod(System.currentTimeMillis() - olderThan,
+					System.currentTimeMillis());
 
-				try (FileWriter fileWriter = new FileWriter(logFile)) {
+			try (FileWriter fileWriter = new FileWriter(logFile)) {
 
-					for (int i = 0; i < filteredList.size(); i++) {
-						fileWriter.write(filteredList.get(i).toString());
-						fileWriter.write("\r\n");
-						fileWriter.flush();
-					}
-
-				} catch (IOException e) {
-
-					System.out.println("Output log to file fault");
-					e.printStackTrace();
-
+				for (int i = 0; i < filteredList.size(); i++) {
+					fileWriter.write(filteredList.get(i).toString());
+					fileWriter.write("\r\n");
+					fileWriter.flush();
 				}
+
+			} catch (IOException e) {
+
+				System.out.println("Output log to file fault");
+				e.printStackTrace();
+
 			}
+
 		}
 	}
 
