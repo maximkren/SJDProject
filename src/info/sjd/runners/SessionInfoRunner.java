@@ -64,6 +64,7 @@ public class SessionInfoRunner {
 		try {
 
 			ioProcessor.deleteOldRecords(86400000);
+			
 
 		} catch (ExceptionSJD e) {
 			e.printStackTrace();

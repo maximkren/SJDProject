@@ -50,7 +50,7 @@ public class IOProcessor {
 
 					long dateOfRecordCreate = Long.parseLong(line.substring(0, 13));
 
-					if (dateOfRecordCreate > fromDate && dateOfRecordCreate < toDate) {
+					if (dateOfRecordCreate >= fromDate && dateOfRecordCreate <= toDate) {
 
 						SessionInfo sessionInfo = new SessionInfo();
 						String[] fieldsSessionInfo = line.split(" ");
