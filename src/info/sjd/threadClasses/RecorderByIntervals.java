@@ -12,7 +12,7 @@ public class RecorderByIntervals extends Thread {
 
 	
 	@Override
-	public synchronized void run() {
+	public void run() {
 
 		
 		RandomValueGenerator r = new RandomValueGenerator();
