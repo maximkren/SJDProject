@@ -25,7 +25,7 @@ public class IOProcessor {
 				fileWriter.flush();
 
 			} catch (IOException e) {
-
+				System.out.println("recording to file failed");
 				e.printStackTrace();
 
 			}
@@ -64,7 +64,7 @@ public class IOProcessor {
 				}
 			} catch (IOException e) {
 
-				System.out.println("Reading log from file is fault");
+				System.out.println("Reading log from file failed");
 				e.printStackTrace();
 
 			}
@@ -93,7 +93,7 @@ public class IOProcessor {
 
 			} catch (IOException e) {
 
-				System.out.println("Output log to file fault");
+				System.out.println("removing old records failed");
 				e.printStackTrace();
 
 			}
